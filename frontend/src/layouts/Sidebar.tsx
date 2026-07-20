@@ -1,4 +1,4 @@
-import { NavLink } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import { X } from "lucide-react";
 import { mainNav } from "@/layouts/nav";
 import { cn } from "@/utils/cn";
@@ -28,14 +28,18 @@ export function Sidebar({
         )}
       >
         <div className="flex h-14 items-center justify-between border-b border-border px-4">
-          <div className="flex items-center gap-2.5">
+          <Link
+            to="/app/dashboard"
+            onClick={onClose}
+            className="flex items-center gap-2.5 transition hover:opacity-90"
+          >
             <span className="flex size-7 items-center justify-center rounded-md bg-accent-soft font-mono text-xs font-semibold text-accent">
               IA
             </span>
             <span className="text-sm font-semibold tracking-tight">
               Insight Analytics
             </span>
-          </div>
+          </Link>
           <button
             type="button"
             className="rounded-md p-1.5 text-muted transition hover:bg-border/50 hover:text-foreground md:hidden"
