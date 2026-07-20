@@ -70,6 +70,23 @@
   ::selection {
     background: color-mix(in oklab, var(--color-accent) 35%, transparent);
   }
+
+  button:not(:disabled),
+  a,
+  summary,
+  [role="button"],
+  label,
+  input[type="checkbox"],
+  input[type="radio"],
+  input[type="file"],
+  select {
+    cursor: pointer;
+  }
+
+  button:disabled,
+  [aria-disabled="true"] {
+    cursor: not-allowed;
+  }
 }
 
 @layer utilities {

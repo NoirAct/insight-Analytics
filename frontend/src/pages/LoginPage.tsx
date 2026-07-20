@@ -3,7 +3,7 @@ import { isAxiosError } from "axios";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Button, Field } from "@/components/ui/Form";
+import { Button, Field, PasswordField } from "@/components/ui/Form";
 import { useAuth } from "@/contexts/AuthContext";
 import { AuthLayout } from "@/layouts/AuthLayout";
 import { loginSchema, type LoginFormValues } from "@/schemas/auth";
@@ -58,9 +58,8 @@ export function LoginPage() {
           error={errors.email?.message}
           {...register("email")}
         />
-        <Field
+        <PasswordField
           label="Senha"
-          type="password"
           autoComplete="current-password"
           placeholder="••••••••"
           error={errors.password?.message}
@@ -68,17 +67,17 @@ export function LoginPage() {
         />
 
         <div className="flex items-center justify-between gap-3 pt-1">
-          <label className="flex items-center gap-2 text-sm text-muted">
+          <label className="flex cursor-pointer items-center gap-2 text-sm text-muted">
             <input
               type="checkbox"
-              className="size-4 rounded border-border bg-bg accent-accent"
+              className="size-4 cursor-pointer rounded border-border bg-bg accent-accent"
               {...register("rememberMe")}
             />
             Lembrar de mim
           </label>
           <Link
             to="/forgot-password"
-            className="text-sm text-accent transition hover:brightness-110"
+            className="cursor-pointer text-sm text-accent transition hover:brightness-110"
           >
             Esqueci a senha
           </Link>
@@ -93,7 +92,7 @@ export function LoginPage() {
 
       <p className="mt-5 text-center text-sm text-muted">
         Não tem conta?{" "}
-        <Link to="/register" className="text-accent hover:brightness-110">
+        <Link to="/register" className="cursor-pointer text-accent hover:brightness-110">
           Criar conta
         </Link>
       </p>
