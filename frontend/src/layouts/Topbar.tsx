@@ -1,5 +1,5 @@
 import { Link } from "react-router-dom";
-import { LogOut, Menu, Moon, Search, Sun, UserRound } from "lucide-react";
+import { LogOut, Menu, Moon, Sun, UserRound } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTheme } from "@/contexts/ThemeContext";
 import { useToast } from "@/contexts/ToastContext";
@@ -29,14 +29,6 @@ export function Topbar({
 
       <div className="min-w-0 flex-1">
         <p className="truncate text-sm font-medium text-foreground">{title}</p>
-      </div>
-
-      <div className="hidden items-center gap-2 rounded-(--radius-md) border border-border bg-surface px-3 py-1.5 text-sm text-muted lg:flex">
-        <Search className="size-3.5" />
-        <span>Busca rápida</span>
-        <kbd className="ml-3 rounded border border-border px-1.5 font-mono text-[10px]">
-          ⌘K
-        </kbd>
       </div>
 
       <button
