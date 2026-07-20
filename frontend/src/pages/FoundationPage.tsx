@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { motion } from "framer-motion";
 import { Activity, Database, Server } from "lucide-react";
+import { Link } from "react-router-dom";
 import { api } from "@/api/client";
 import { cn } from "@/utils/cn";
 
@@ -36,7 +37,10 @@ export function FoundationPage() {
           Fundação pronta para o SaaS
         </h1>
         <p className="mt-3 max-w-xl text-muted">
-          Frontend, API, Prisma e Docker configurados. Próxima etapa: autenticação.
+          Frontend, API, Prisma e Docker configurados.{" "}
+          <Link to="/login" className="text-accent hover:brightness-110">
+            Ir para login
+          </Link>
         </p>
 
         <div className="mt-8 grid gap-3 sm:grid-cols-3">

@@ -1,0 +1,14 @@
+{
+  "name": "insight-analytics",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "dev": "npm run dev:backend & npm run dev:frontend; wait",
+    "dev:frontend": "npm --prefix frontend run dev",
+    "dev:backend": "npm --prefix backend run dev",
+    "db:up": "docker compose up -d",
+    "db:down": "docker compose down",
+    "db:push": "npm --prefix backend exec prisma db push",
+    "install:all": "npm --prefix backend install && npm --prefix frontend install"
+  }
+}

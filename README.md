@@ -46,10 +46,26 @@ npm run dev            # http://localhost:5173
 
 Health check da API: `GET http://localhost:3333/api/health`
 
+## Autenticação (Etapa 2)
+
+Rotas:
+
+- `POST /api/auth/register`
+- `POST /api/auth/login` (`rememberMe` opcional)
+- `POST /api/auth/refresh` (cookie httpOnly)
+- `POST /api/auth/logout`
+- `GET /api/auth/me`
+- `POST /api/auth/forgot-password`
+- `POST /api/auth/reset-password`
+
+UI: `/login`, `/register`, `/forgot-password`, `/reset-password`, área protegida `/app`.
+
+Em desenvolvimento, o forgot-password devolve `resetUrl` no JSON para facilitar o teste.
+
 ## Etapas do projeto
 
-1. **Fundação** — scaffold, Docker, tema, estrutura
-2. Autenticação
+1. Fundação — scaffold, Docker, tema, estrutura
+2. **Autenticação** — JWT, refresh, remember me, recuperação
 3. Layout do app
 4. Dashboard
 5. Gestão de usuários
