@@ -65,8 +65,8 @@ Em desenvolvimento, o forgot-password devolve `resetUrl` no JSON para facilitar 
 ## Etapas do projeto
 
 1. Fundação — scaffold, Docker, tema, estrutura
-2. **Autenticação** — JWT, refresh, remember me, recuperação
-3. Layout do app
+2. Autenticação — JWT, refresh, remember me, recuperação
+3. **Layout do app** — sidebar, topbar, tema, toasts, empty/error/skeleton
 4. Dashboard
 5. Gestão de usuários
 6. Gestão de produtos

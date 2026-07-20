@@ -35,7 +35,7 @@ export function RegisterPage() {
         email: values.email,
         password: values.password,
       });
-      navigate("/app", { replace: true });
+      navigate("/app/dashboard", { replace: true });
     } catch (error) {
       if (isAxiosError(error)) {
         setFormError(error.response?.data?.error ?? "Falha no cadastro");

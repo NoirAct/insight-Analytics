@@ -36,7 +36,7 @@ export function LoginPage() {
         rememberMe: values.rememberMe,
       });
       const redirectTo =
-        (location.state as { from?: string } | null)?.from ?? "/app";
+        (location.state as { from?: string } | null)?.from ?? "/app/dashboard";
       navigate(redirectTo, { replace: true });
     } catch (error) {
       if (isAxiosError(error)) {
