@@ -1,6 +1,6 @@
 import "dotenv/config";
 import bcrypt from "bcrypt";
-import { PrismaClient, ProductStatus } from "@prisma/client";
+import { PrismaClient, ProductStatus, UserStatus } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
@@ -12,6 +12,44 @@ const PRODUCT_DEFS = [
   { name: "API Extra", price: 49, category: "Add-ons" },
   { name: "Suporte Priority", price: 99, category: "Serviços" },
   { name: "Consultoria", price: 450, category: "Serviços" },
+];
+
+const PERMISSIONS = [
+  { key: "users.read", description: "Visualizar usuários" },
+  { key: "users.write", description: "Gerenciar usuários" },
+  { key: "products.read", description: "Visualizar produtos" },
+  { key: "products.write", description: "Gerenciar produtos" },
+  { key: "reports.read", description: "Visualizar relatórios" },
+  { key: "settings.write", description: "Editar configurações" },
+];
+
+const ROLE_DEFS = [
+  {
+    name: "Admin",
+    description: "Acesso total à plataforma",
+    permissions: PERMISSIONS.map((item) => item.key),
+  },
+  {
+    name: "Manager",
+    description: "Gestão operacional",
+    permissions: [
+      "users.read",
+      "users.write",
+      "products.read",
+      "products.write",
+      "reports.read",
+    ],
+  },
+  {
+    name: "Analyst",
+    description: "Análise e leitura",
+    permissions: ["users.read", "products.read", "reports.read"],
+  },
+  {
+    name: "Viewer",
+    description: "Somente visualização",
+    permissions: ["users.read", "products.read", "reports.read"],
+  },
 ];
 
 function daysAgo(n: number) {
@@ -34,7 +72,35 @@ async function main() {
   await prisma.passwordResetToken.deleteMany();
   await prisma.user.deleteMany();
   await prisma.companySettings.deleteMany();
+  await prisma.role.deleteMany();
+  await prisma.permission.deleteMany();
 
+  const permissions = await Promise.all(
+    PERMISSIONS.map((item) =>
+      prisma.permission.create({
+        data: item,
+      }),
+    ),
+  );
+  const permissionByKey = new Map(permissions.map((item) => [item.key, item.id]));
+
+  const roles = [];
+  for (const roleDef of ROLE_DEFS) {
+    const role = await prisma.role.create({
+      data: {
+        name: roleDef.name,
+        description: roleDef.description,
+        permissions: {
+          connect: roleDef.permissions.map((key) => ({
+            id: permissionByKey.get(key)!,
+          })),
+        },
+      },
+    });
+    roles.push(role);
+  }
+
+  const roleByName = new Map(roles.map((item) => [item.name, item.id]));
   const passwordHash = await bcrypt.hash("novaSenha1", 12);
 
   const demoUser = await prisma.user.create({
@@ -45,9 +111,13 @@ async function main() {
       status: "ACTIVE",
       theme: "dark",
       locale: "pt-BR",
+      roleId: roleByName.get("Admin"),
       createdAt: daysAgo(200),
     },
   });
+
+  const statuses: UserStatus[] = ["ACTIVE", "ACTIVE", "ACTIVE", "INACTIVE", "INVITED"];
+  const roleNames = ["Manager", "Analyst", "Viewer", "Analyst", "Viewer"];
 
   const extraUsers = await Promise.all(
     Array.from({ length: 48 }).map((_, index) =>
@@ -56,7 +126,8 @@ async function main() {
           name: `Usuário ${index + 1}`,
           email: `user${index + 1}@insight.dev`,
           passwordHash,
-          status: "ACTIVE",
+          status: statuses[index % statuses.length],
+          roleId: roleByName.get(roleNames[index % roleNames.length]),
           createdAt: daysAgo(Math.floor(Math.random() * 360)),
         },
       }),
@@ -162,7 +233,9 @@ async function main() {
     },
   });
 
-  console.log(`Seed ok: demo=${demoUser.email} + ${extraUsers.length} usuários`);
+  console.log(
+    `Seed ok: demo=${demoUser.email} + ${extraUsers.length} usuários + ${roles.length} cargos`,
+  );
 }
 
 main()

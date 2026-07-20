@@ -15,6 +15,7 @@ type AuthContextValue = {
   user: User | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  setUser: (user: User | null) => void;
   login: (input: {
     email: string;
     password: string;
@@ -90,6 +91,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       user,
       isAuthenticated: Boolean(user),
       isLoading,
+      setUser,
       login,
       register,
       logout,

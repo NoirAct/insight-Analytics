@@ -37,7 +37,8 @@ export function FoundationPage() {
           Fundação pronta para o SaaS
         </h1>
         <p className="mt-3 max-w-xl text-muted">
-          Frontend, API, Prisma e Docker configurados.{" "}
+          Plataforma pronta: auth, dashboard, usuários, produtos, relatórios e
+          perfil.{" "}
           <Link to="/login" className="text-accent hover:brightness-110">
             Ir para login
           </Link>

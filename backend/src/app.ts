@@ -1,6 +1,7 @@
 import cookieParser from "cookie-parser";
 import cors from "cors";
 import express from "express";
+import path from "node:path";
 import { env } from "./config/env.js";
 import { errorHandler } from "./middlewares/error-handler.js";
 import { routes } from "./routes/index.js";
@@ -18,6 +19,7 @@ export function createApp() {
   );
   app.use(express.json());
   app.use(cookieParser());
+  app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 
   app.use("/api", routes);
   app.use(errorHandler);

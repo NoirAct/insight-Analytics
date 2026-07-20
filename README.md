@@ -67,9 +67,9 @@ Em desenvolvimento, o forgot-password devolve `resetUrl` no JSON para facilitar 
 1. Fundação — scaffold, Docker, tema, estrutura
 2. Autenticação — JWT, refresh, remember me, recuperação
 3. Layout do app — sidebar, topbar, tema, toasts, empty/error/skeleton
-4. **Dashboard** — KPIs, filtros de período, gráficos Recharts + seed
-5. Gestão de usuários
-6. Gestão de produtos
-7. Relatórios e perfil
-8. Polimento (performance, Lighthouse)
+4. Dashboard — KPIs, filtros de período, gráficos Recharts + seed
+5. Gestão de usuários — CRUD, cargos, permissões, foto, filtros, paginação
+6. Gestão de produtos — CRUD, categorias, preço, estoque, status, imagem
+7. **Relatórios e perfil** — tabela/export, perfil, empresa, sessões, notificações
+8. **Polimento** — lazy loading, code splitting, SEO básico
 # insight-Analytics

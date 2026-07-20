@@ -1,17 +1,49 @@
+import { lazy, Suspense } from "react";
 import { Navigate, Route, Routes } from "react-router-dom";
 import { GuestRoute, ProtectedRoute } from "@/components/ProtectedRoute";
 import { AppLayout } from "@/layouts/AppLayout";
-import { DashboardPage } from "@/pages/dashboard/DashboardPage";
 import { ForgotPasswordPage } from "@/pages/ForgotPasswordPage";
 import { FoundationPage } from "@/pages/FoundationPage";
 import { LoginPage } from "@/pages/LoginPage";
-import { ProductsPage } from "@/pages/products/ProductsPage";
-import { ProfilePage } from "@/pages/profile/ProfilePage";
 import { RegisterPage } from "@/pages/RegisterPage";
-import { ReportsPage } from "@/pages/reports/ReportsPage";
 import { ResetPasswordPage } from "@/pages/ResetPasswordPage";
-import { SettingsPage } from "@/pages/settings/SettingsPage";
-import { UsersPage } from "@/pages/users/UsersPage";
+
+const DashboardPage = lazy(() =>
+  import("@/pages/dashboard/DashboardPage").then((m) => ({
+    default: m.DashboardPage,
+  })),
+);
+const UsersPage = lazy(() =>
+  import("@/pages/users/UsersPage").then((m) => ({ default: m.UsersPage })),
+);
+const ProductsPage = lazy(() =>
+  import("@/pages/products/ProductsPage").then((m) => ({
+    default: m.ProductsPage,
+  })),
+);
+const ReportsPage = lazy(() =>
+  import("@/pages/reports/ReportsPage").then((m) => ({
+    default: m.ReportsPage,
+  })),
+);
+const SettingsPage = lazy(() =>
+  import("@/pages/settings/SettingsPage").then((m) => ({
+    default: m.SettingsPage,
+  })),
+);
+const ProfilePage = lazy(() =>
+  import("@/pages/profile/ProfilePage").then((m) => ({
+    default: m.ProfilePage,
+  })),
+);
+
+function RouteFallback() {
+  return (
+    <div className="flex min-h-40 items-center justify-center">
+      <div className="h-8 w-8 animate-pulse rounded-full bg-surface" />
+    </div>
+  );
+}
 
 export default function App() {
   return (
@@ -28,12 +60,54 @@ export default function App() {
       <Route element={<ProtectedRoute />}>
         <Route path="/app" element={<AppLayout />}>
           <Route index element={<Navigate to="dashboard" replace />} />
-          <Route path="dashboard" element={<DashboardPage />} />
-          <Route path="users" element={<UsersPage />} />
-          <Route path="products" element={<ProductsPage />} />
-          <Route path="reports" element={<ReportsPage />} />
-          <Route path="settings" element={<SettingsPage />} />
-          <Route path="profile" element={<ProfilePage />} />
+          <Route
+            path="dashboard"
+            element={
+              <Suspense fallback={<RouteFallback />}>
+                <DashboardPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="users"
+            element={
+              <Suspense fallback={<RouteFallback />}>
+                <UsersPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="products"
+            element={
+              <Suspense fallback={<RouteFallback />}>
+                <ProductsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="reports"
+            element={
+              <Suspense fallback={<RouteFallback />}>
+                <ReportsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="settings"
+            element={
+              <Suspense fallback={<RouteFallback />}>
+                <SettingsPage />
+              </Suspense>
+            }
+          />
+          <Route
+            path="profile"
+            element={
+              <Suspense fallback={<RouteFallback />}>
+                <ProfilePage />
+              </Suspense>
+            }
+          />
         </Route>
       </Route>
 
