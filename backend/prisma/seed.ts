@@ -1,248 +1,64 @@
 import "dotenv/config";
 import bcrypt from "bcrypt";
-import { PrismaClient, ProductStatus, UserStatus } from "@prisma/client";
+import { PrismaClient, ProductStatus } from "@prisma/client";
 
 const prisma = new PrismaClient();
+const DEMO_EMAIL = "demo@insight.dev";
+const DEMO_PASSWORD = "DemoInsight2026!";
 
-const SOURCES = ["Orgânico", "Google Ads", "Instagram", "Indicação", "Direto"];
-const PRODUCT_DEFS = [
-  { name: "Analytics Pro", price: 189, category: "Planos" },
-  { name: "Insight Starter", price: 79, category: "Planos" },
-  { name: "Dashboards Pack", price: 129, category: "Add-ons" },
-  { name: "API Extra", price: 49, category: "Add-ons" },
-  { name: "Suporte Priority", price: 99, category: "Serviços" },
-  { name: "Consultoria", price: 450, category: "Serviços" },
-];
-
-const PERMISSIONS = [
-  { key: "users.read", description: "Visualizar usuários" },
-  { key: "users.write", description: "Gerenciar usuários" },
-  { key: "products.read", description: "Visualizar produtos" },
-  { key: "products.write", description: "Gerenciar produtos" },
-  { key: "reports.read", description: "Visualizar relatórios" },
-  { key: "settings.write", description: "Editar configurações" },
-];
-
-const ROLE_DEFS = [
-  {
-    name: "Admin",
-    description: "Acesso total à plataforma",
-    permissions: PERMISSIONS.map((item) => item.key),
-  },
-  {
-    name: "Manager",
-    description: "Gestão operacional",
-    permissions: [
-      "users.read",
-      "users.write",
-      "products.read",
-      "products.write",
-      "reports.read",
-    ],
-  },
-  {
-    name: "Analyst",
-    description: "Análise e leitura",
-    permissions: ["users.read", "products.read", "reports.read"],
-  },
-  {
-    name: "Viewer",
-    description: "Somente visualização",
-    permissions: ["users.read", "products.read", "reports.read"],
-  },
-];
-
-function daysAgo(n: number) {
-  const date = new Date();
-  date.setHours(12, 0, 0, 0);
-  date.setDate(date.getDate() - n);
-  return date;
-}
+const permissions = [
+  ["users.read", "Visualizar usuários"], ["users.write", "Gerenciar usuários"],
+  ["products.read", "Visualizar produtos"], ["products.write", "Gerenciar produtos"],
+  ["reports.read", "Visualizar relatórios"], ["settings.write", "Editar configurações"],
+] as const;
+const products = [
+  ["Analytics Pro", 189, "Planos"], ["Insight Starter", 79, "Planos"],
+  ["Dashboards Pack", 129, "Add-ons"], ["API Extra", 49, "Add-ons"],
+  ["Suporte Priority", 99, "Serviços"], ["Consultoria", 450, "Serviços"],
+] as const;
 
 async function main() {
-  console.log("Seeding database...");
-
-  await prisma.orderItem.deleteMany();
-  await prisma.order.deleteMany();
-  await prisma.revenue.deleteMany();
-  await prisma.product.deleteMany();
-  await prisma.category.deleteMany();
-  await prisma.notification.deleteMany();
-  await prisma.session.deleteMany();
-  await prisma.passwordResetToken.deleteMany();
-  await prisma.user.deleteMany();
-  await prisma.companySettings.deleteMany();
-  await prisma.role.deleteMany();
-  await prisma.permission.deleteMany();
-
-  const permissions = await Promise.all(
-    PERMISSIONS.map((item) =>
-      prisma.permission.create({
-        data: item,
-      }),
-    ),
-  );
-  const permissionByKey = new Map(permissions.map((item) => [item.key, item.id]));
-
-  const roles = [];
-  for (const roleDef of ROLE_DEFS) {
-    const role = await prisma.role.create({
-      data: {
-        name: roleDef.name,
-        description: roleDef.description,
-        permissions: {
-          connect: roleDef.permissions.map((key) => ({
-            id: permissionByKey.get(key)!,
-          })),
-        },
-      },
-    });
-    roles.push(role);
+  for (const [key, description] of permissions) {
+    await prisma.permission.upsert({ where: { key }, update: { description }, create: { key, description } });
+  }
+  const allPermissions = await prisma.permission.findMany();
+  const admin = await prisma.role.upsert({
+    where: { name: "Admin" },
+    update: { permissions: { set: allPermissions.map(({ id }) => ({ id })) } },
+    create: { name: "Admin", description: "Acesso total à plataforma", permissions: { connect: allPermissions.map(({ id }) => ({ id })) } },
+  });
+  for (const name of ["Manager", "Analyst", "Viewer"]) {
+    await prisma.role.upsert({ where: { name }, update: {}, create: { name } });
   }
 
-  const roleByName = new Map(roles.map((item) => [item.name, item.id]));
-  const passwordHash = await bcrypt.hash("novaSenha1", 12);
-
-  const demoUser = await prisma.user.create({
-    data: {
-      name: "Demo User",
-      email: "demo@insight.dev",
-      passwordHash,
-      status: "ACTIVE",
-      theme: "dark",
-      locale: "pt-BR",
-      roleId: roleByName.get("Admin"),
-      createdAt: daysAgo(200),
-    },
+  const passwordHash = await bcrypt.hash(DEMO_PASSWORD, 12);
+  const demo = await prisma.user.upsert({
+    where: { email: DEMO_EMAIL },
+    update: { name: "Demo User", passwordHash, status: "ACTIVE", roleId: admin.id },
+    create: { name: "Demo User", email: DEMO_EMAIL, passwordHash, status: "ACTIVE", roleId: admin.id },
   });
 
-  const statuses: UserStatus[] = ["ACTIVE", "ACTIVE", "ACTIVE", "INACTIVE", "INVITED"];
-  const roleNames = ["Manager", "Analyst", "Viewer", "Analyst", "Viewer"];
-
-  const extraUsers = await Promise.all(
-    Array.from({ length: 48 }).map((_, index) =>
-      prisma.user.create({
-        data: {
-          name: `Usuário ${index + 1}`,
-          email: `user${index + 1}@insight.dev`,
-          passwordHash,
-          status: statuses[index % statuses.length],
-          roleId: roleByName.get(roleNames[index % roleNames.length]),
-          createdAt: daysAgo(Math.floor(Math.random() * 360)),
-        },
-      }),
-    ),
-  );
-
-  const categories = await Promise.all(
-    ["Planos", "Add-ons", "Serviços"].map((name) =>
-      prisma.category.create({
-        data: {
-          name,
-          slug: name.toLowerCase().replace(/\s+/g, "-"),
-        },
-      }),
-    ),
-  );
-
-  const categoryByName = new Map(categories.map((item) => [item.name, item.id]));
-
-  const products = await Promise.all(
-    PRODUCT_DEFS.map((item) =>
-      prisma.product.create({
-        data: {
-          name: item.name,
-          description: `${item.name} para o SaaS Insight Analytics`,
-          price: item.price,
-          stock: 40 + Math.floor(Math.random() * 80),
-          status: ProductStatus.ACTIVE,
-          categoryId: categoryByName.get(item.category),
-        },
-      }),
-    ),
-  );
-
-  for (let day = 0; day < 365; day += 1) {
-    const date = daysAgo(day);
-    const weekdayBoost = [0, 6].includes(date.getDay()) ? 0.7 : 1;
-    const trend = 1 + (365 - day) / 900;
-    const orderCount = Math.max(
-      0,
-      Math.round((1 + Math.random() * 4) * weekdayBoost * trend),
-    );
-
-    let dayRevenue = 0;
-
-    for (let i = 0; i < orderCount; i += 1) {
-      const itemCount = 1 + Math.floor(Math.random() * 3);
-      const selected = Array.from({ length: itemCount }).map(() => {
-        const product = products[Math.floor(Math.random() * products.length)]!;
-        const quantity = 1 + Math.floor(Math.random() * 2);
-        return {
-          productId: product.id,
-          quantity,
-          unitPrice: Number(product.price),
-          lineTotal: Number(product.price) * quantity,
-        };
-      });
-
-      const total = selected.reduce((sum, item) => sum + item.lineTotal, 0);
-      dayRevenue += total;
-
-      await prisma.order.create({
-        data: {
-          customerName: `Cliente ${day}-${i}`,
-          total,
-          status: "completed",
-          source: SOURCES[Math.floor(Math.random() * SOURCES.length)],
-          createdAt: date,
-          updatedAt: date,
-          items: {
-            create: selected.map(({ productId, quantity, unitPrice }) => ({
-              productId,
-              quantity,
-              unitPrice,
-            })),
-          },
-        },
-      });
-    }
-
-    if (dayRevenue > 0) {
-      await prisma.revenue.create({
-        data: {
-          amount: Number(dayRevenue.toFixed(2)),
-          date,
-          source: "orders",
-        },
-      });
-    }
+  for (const name of ["Planos", "Add-ons", "Serviços"]) {
+    await prisma.category.upsert({ where: { name }, update: {}, create: { name, slug: name.toLowerCase().replace(/\s+/g, "-") } });
+  }
+  const categories = new Map((await prisma.category.findMany()).map((item) => [item.name, item.id]));
+  for (const [name, price, category] of products) {
+    const existing = await prisma.product.findFirst({ where: { name } });
+    const data = { name, price, stock: 75, status: ProductStatus.ACTIVE, categoryId: categories.get(category) };
+    if (existing) await prisma.product.update({ where: { id: existing.id }, data });
+    else await prisma.product.create({ data });
   }
 
-  await prisma.companySettings.create({
-    data: {
-      name: "Insight Analytics",
-    },
-  });
-
-  await prisma.notification.create({
-    data: {
-      userId: demoUser.id,
-      title: "Bem-vindo",
-      body: "Dashboard com dados de demonstração pronto.",
-    },
-  });
-
-  console.log(
-    `Seed ok: demo=${demoUser.email} + ${extraUsers.length} usuários + ${roles.length} cargos`,
-  );
+  if (await prisma.revenue.count({ where: { source: "demo-seed" } }) === 0) {
+    await prisma.revenue.createMany({ data: Array.from({ length: 90 }, (_, index) => ({
+      amount: 900 + ((index * 137) % 1700), date: new Date(Date.UTC(2026, 5, 1 + index)), source: "demo-seed",
+    })) });
+  }
+  await prisma.companySettings.upsert({ where: { id: "demo-company" }, update: { name: "Insight Analytics" }, create: { id: "demo-company", name: "Insight Analytics" } });
+  if (await prisma.notification.count({ where: { userId: demo.id, title: "Bem-vindo à demonstração" } }) === 0) {
+    await prisma.notification.create({ data: { userId: demo.id, title: "Bem-vindo à demonstração", body: "Explore os indicadores em modo somente leitura." } });
+  }
+  console.log(`Seed ready. Demo account: ${DEMO_EMAIL}`);
 }
 
-main()
-  .catch((error) => {
-    console.error(error);
-    process.exit(1);
-  })
-  .finally(async () => {
-    await prisma.$disconnect();
-  });
+main().catch((error) => { console.error(error); process.exit(1); }).finally(() => prisma.$disconnect());

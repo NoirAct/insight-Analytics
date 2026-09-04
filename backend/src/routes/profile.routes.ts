@@ -2,10 +2,12 @@ import { Router } from "express";
 import { profileController } from "../controllers/profile.controller.js";
 import { requireAuth } from "../middlewares/auth.js";
 import { avatarUpload, companyLogoUpload } from "../middlewares/upload.js";
+import { demoReadOnly } from "../middlewares/demo-mode.js";
 
 export const profileRouter = Router();
 
 profileRouter.use(requireAuth);
+profileRouter.use(demoReadOnly);
 
 profileRouter.patch("/me", profileController.updateMe);
 profileRouter.post("/me/avatar", avatarUpload.single("avatar"), profileController.uploadAvatar);

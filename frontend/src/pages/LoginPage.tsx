@@ -9,6 +9,7 @@ import { AuthLayout } from "@/layouts/AuthLayout";
 import { loginSchema, type LoginFormValues } from "@/schemas/auth";
 
 export function LoginPage() {
+  const isDemo = import.meta.env.VITE_DEMO_MODE === "true";
   const { login } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -21,8 +22,8 @@ export function LoginPage() {
   } = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
-      email: "",
-      password: "",
+      email: isDemo ? "demo@insight.dev" : "",
+      password: isDemo ? "DemoInsight2026!" : "",
       rememberMe: true,
     },
   });
@@ -49,6 +50,11 @@ export function LoginPage() {
 
   return (
     <AuthLayout title="Entrar" subtitle="Acesse seu painel de indicadores.">
+      {isDemo ? (
+        <p className="mb-4 rounded-lg border border-accent/30 bg-accent/10 p-3 text-sm text-muted">
+          Demonstração somente leitura. As credenciais já estão preenchidas.
+        </p>
+      ) : null}
       <form className="space-y-4" onSubmit={onSubmit} noValidate>
         <Field
           label="E-mail"
@@ -75,12 +81,7 @@ export function LoginPage() {
             />
             Lembrar de mim
           </label>
-          <Link
-            to="/forgot-password"
-            className="cursor-pointer text-sm text-accent transition hover:brightness-110"
-          >
-            Esqueci a senha
-          </Link>
+          {!isDemo ? <Link to="/forgot-password" className="cursor-pointer text-sm text-accent transition hover:brightness-110">Esqueci a senha</Link> : null}
         </div>
 
         {formError ? <p className="text-sm text-danger">{formError}</p> : null}
@@ -90,12 +91,12 @@ export function LoginPage() {
         </Button>
       </form>
 
-      <p className="mt-5 text-center text-sm text-muted">
+      {!isDemo ? <p className="mt-5 text-center text-sm text-muted">
         Não tem conta?{" "}
         <Link to="/register" className="cursor-pointer text-accent hover:brightness-110">
           Criar conta
         </Link>
-      </p>
+      </p> : null}
     </AuthLayout>
   );
 }

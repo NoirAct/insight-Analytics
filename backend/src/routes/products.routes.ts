@@ -2,10 +2,12 @@ import { Router } from "express";
 import { productsController } from "../controllers/products.controller.js";
 import { requireAuth } from "../middlewares/auth.js";
 import { productImageUpload } from "../middlewares/upload.js";
+import { demoReadOnly } from "../middlewares/demo-mode.js";
 
 export const productsRouter = Router();
 
 productsRouter.use(requireAuth);
+productsRouter.use(demoReadOnly);
 
 productsRouter.get("/categories", productsController.listCategories);
 productsRouter.post("/categories", productsController.createCategory);

@@ -13,6 +13,7 @@ const envSchema = z.object({
   JWT_REFRESH_REMEMBER_EXPIRES_IN: z.string().default("30d"),
   CORS_ORIGIN: z.string().default("http://localhost:5173"),
   FRONTEND_URL: z.string().default("http://localhost:5173"),
+  DEMO_MODE: z.string().default("false").transform((value) => value === "true"),
 });
 
 const parsed = envSchema.safeParse(process.env);

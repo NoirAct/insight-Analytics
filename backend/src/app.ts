@@ -4,6 +4,7 @@ import express from "express";
 import path from "node:path";
 import { env } from "./config/env.js";
 import { errorHandler } from "./middlewares/error-handler.js";
+import { authRateLimit } from "./middlewares/rate-limit.js";
 import { routes } from "./routes/index.js";
 
 export function createApp() {
@@ -17,10 +18,11 @@ export function createApp() {
       credentials: true,
     }),
   );
-  app.use(express.json());
+  app.use(express.json({ limit: "100kb" }));
   app.use(cookieParser());
   app.use("/uploads", express.static(path.resolve(process.cwd(), "uploads")));
 
+  app.use("/api/auth", authRateLimit);
   app.use("/api", routes);
   app.use(errorHandler);
 
