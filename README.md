@@ -107,6 +107,9 @@ seed idempotente antes da API. Em plano pago, esses comandos podem ser movidos
 para `preDeployCommand`. Cadastre
 `DATABASE_URL`, `CORS_ORIGIN` e `FRONTEND_URL`; mantenha os segredos JWT fora do Git.
 
+O build usa `npm ci --include=dev` para disponibilizar TypeScript e os pacotes de
+tipos durante a compilação, mesmo com `NODE_ENV=production`.
+
 ### Frontend na Vercel
 
 Use `frontend` como Root Directory, `npm run build` como Build Command e `dist`

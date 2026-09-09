@@ -3,7 +3,7 @@ services:
     name: insight-analytics-api
     runtime: node
     rootDir: backend
-    buildCommand: npm ci && npm run db:generate && npm run build
+    buildCommand: npm ci --include=dev && npm run db:generate && npm run build
     startCommand: npm run db:deploy && npm run db:seed && npm start
     healthCheckPath: /api/health
     envVars:
